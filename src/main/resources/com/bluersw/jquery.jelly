@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
+	<script src="${it.packageUrl}/javascript/jQuery-3.5.1-min.js" type="text/javascript" />
+</j:jelly>
