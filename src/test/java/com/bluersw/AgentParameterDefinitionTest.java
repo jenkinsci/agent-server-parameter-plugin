@@ -17,10 +17,10 @@ public class AgentParameterDefinitionTest {
 
 	@Test
 	public void testScriptedPipeline() throws Exception{
-		AgentParameterDefinition slaveParam = new AgentParameterDefinition(NAME, DEFAULT_VALUE);
+		AgentParameterDefinition agentParam = new AgentParameterDefinition(NAME, DEFAULT_VALUE);
 
 		WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-scripted-pipeline");
-		job.addProperty(new ParametersDefinitionProperty(slaveParam));
+		job.addProperty(new ParametersDefinitionProperty(agentParam));
 		String pipelineScript
 				= "node {\n"
 				+ "  print params['agent'] \n"
