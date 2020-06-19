@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>agent-server-parameter</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>hpi</packaging>
     <name>Agent Server Parameter Plug-In</name>
     <properties>
@@ -92,4 +92,8 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
+  <scm>
+    <tag>agent-server-parameter-1.0</tag>
+  </scm>
 </project>
