@@ -10,6 +10,7 @@ import javax.annotation.CheckForNull;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.cli.CLICommand;
 import hudson.model.Computer;
@@ -160,9 +161,10 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		return new AgentParameterValue(this.getName(), this.getDefaultValue());
 	}
 
+	@SuppressFBWarnings(value="EQ_COMPARETO_USE_OBJECT_EQUALS")
 	@Override
 	public int compareTo(AgentParameterDefinition o) {
-		if (this.uuid == o.uuid) {
+		if (o.uuid.equals(this.uuid)) {
 			return 0;
 		}
 		else {
