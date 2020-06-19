@@ -12,6 +12,8 @@
     <version>1.0</version>
     <packaging>hpi</packaging>
     <name>Agent Server Parameter Plug-In</name>
+    <description>This plug-in is used to select the build server before building. If you have multiple build servers, you can use this plug-in to make a convenient selection before building. The plug-in will remember that the server you choose each time is convenient for the next build.</description>
+    <url>https://github.com/jenkinsci/agent-server-parameter-plugin</url>
     <properties>
         <jenkins.version>2.164.1</jenkins.version>
         <java.level>8</java.level>
@@ -36,6 +38,13 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
+    <developers>
+        <developer>
+            <id>sunweisheng</id>
+            <name>SunWeiSheng</name>
+            <email>sunweisheng@live.cn</email>
+        </developer>
+    </developers>
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
