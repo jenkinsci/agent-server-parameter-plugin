@@ -42,3 +42,5 @@ buildNumber.properties
 .idea/
 
 work/
+
+.scannerwork/
