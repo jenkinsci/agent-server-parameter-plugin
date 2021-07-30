@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.50</version>
+        <version>4.16</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
@@ -15,7 +15,8 @@
     <description>This plug-in is used to select the build server before building. If you have multiple build servers, you can use this plug-in to make a convenient selection before building. The plug-in will remember that the server you choose each time is convenient for the next build.</description>
     <url>https://github.com/jenkinsci/agent-server-parameter-plugin</url>
     <properties>
-        <jenkins.version>2.164.1</jenkins.version>
+        <!--https://www.jenkins.io/doc/developer/plugin-development/updating-parent/-->
+        <jenkins.version>2.277.1</jenkins.version>
         <java.level>8</java.level>
     </properties>
     <licenses>
@@ -24,12 +25,6 @@
             <url>https://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
     <developers>
         <developer>
             <id>bluersw</id>
@@ -37,6 +32,12 @@
             <email>sunweisheng@live.cn</email>
         </developer>
     </developers>
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
@@ -48,8 +49,8 @@
             <dependency>
                 <!-- Pick up common dependencies for 2.164.x: https://github.com/jenkinsci/bom#usage -->
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.164.x</artifactId>
-                <version>3</version>
+                <artifactId>bom-2.277.x</artifactId>
+                <version>26</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
