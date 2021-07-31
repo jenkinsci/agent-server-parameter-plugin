@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>agent-server-parameter</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>hpi</packaging>
     <name>Agent Server Parameter Plug-In</name>
     <description>This plug-in is used to select the build server before building. If you have multiple build servers, you can use this plug-in to make a convenient selection before building. The plug-in will remember that the server you choose each time is convenient for the next build.</description>
@@ -99,6 +99,6 @@
       <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
       <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
       <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-      <tag>HEAD</tag>
+      <tag>agent-server-parameter-1.1</tag>
   </scm>
 </project>
