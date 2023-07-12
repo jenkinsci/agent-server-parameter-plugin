@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
             <artifactId>rebuild</artifactId>
-            <version>1.25</version>
+            <version>320.v5a_0933a_e7d61</version>
             <optional>true</optional>
         </dependency>
     </dependencies>
