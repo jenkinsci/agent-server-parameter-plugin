@@ -7,9 +7,14 @@ The advantage of using this plugin is that you may have multiple servers for bui
 
 [中文说明](README_ZH.md)
 
-## basic configuration
+## Requirements
 
-In the project configuration page, select the "This project is parameterized" check box, add "Agent Server Parameter" parameter, create a parameter name, you can also click "Advanced" to set the default build server name, the default value is not a required option, if it is The default is the master server.
+- Jenkins 2.541.3 or newer
+- Java 17 or newer
+
+## Basic configuration
+
+In the project configuration page, select the "This project is parameterized" check box, add an "Agent Server Parameter", and create a parameter name. You can also click "Advanced" to set the default agent name. If it is empty, Jenkins uses the built-in node label.
 ![project doc image](docs/images/image-02.png)
 
 The method of reading parameter values at build time:
@@ -48,4 +53,3 @@ pipeline {
 ```
 
 It is possible to create parameters in the build script, but because each execution of the build script creates a new "Agent Server Parameter" build parameter, the last selected value cannot be retained.
-

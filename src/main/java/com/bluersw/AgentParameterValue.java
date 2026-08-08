@@ -1,8 +1,11 @@
 package com.bluersw;
 
+import java.io.Serial;
+
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Label;
+import hudson.model.Queue;
 import hudson.model.Run;
 import hudson.model.StringParameterValue;
 import hudson.model.queue.SubTask;
@@ -13,6 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * @author sunweisheng
  */
 public class AgentParameterValue extends StringParameterValue {
+	@Serial
 	private static final long serialVersionUID = 6413402566819239460L;
 
 	@DataBoundConstructor
@@ -33,7 +37,7 @@ public class AgentParameterValue extends StringParameterValue {
 	 * */
 	@Override
 	public Label getAssignedLabel(SubTask task) {
-		return Label.get(this.value);
+		return task instanceof Queue.FlyweightTask ? null : Label.get(this.value);
 	}
 
 	/**
