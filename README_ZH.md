@@ -5,9 +5,14 @@
 使用这个插件的优势在于你可能有多台用于构建的服务器：
 ![project doc image](docs/images/image-01.png)
 
+## 运行要求
+
+- Jenkins 2.541.3 或更高版本
+- Java 17 或更高版本
+
 ## 基本配置
 
-在项目的配置页面选择"This project is parameterized"复选框，添加"Agent Server Parameter"参数，创建参数名称,还可以点击"高级"设置默认的构建服务器名称，默认值不是必填选项，如果为空则默认master服务器。
+在项目的配置页面选择"This project is parameterized"复选框，添加"Agent Server Parameter"参数，创建一个参数名称。还可以点击"高级"设置默认的 Agent 名称；如果为空，Jenkins 使用内置节点标签。
 ![project doc image](docs/images/image-02.png)
 
 在构建时读取参数值的方法：

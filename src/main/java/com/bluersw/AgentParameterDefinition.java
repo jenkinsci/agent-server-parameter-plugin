@@ -1,20 +1,22 @@
 package com.bluersw;
 
+import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.CheckForNull;
-
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.cli.CLICommand;
 import hudson.model.Computer;
+import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.Node;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersDefinitionProperty;
@@ -28,20 +30,18 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * @author sunweisheng
  * Jenkins 构建参数：Agent服务器选择（Jenkins build parameters: Agent server selection）
  */
-public class AgentParameterDefinition extends ParameterDefinition implements  Comparable<AgentParameterDefinition> {
+public class AgentParameterDefinition extends ParameterDefinition {
 
+	@Serial
 	private static final long serialVersionUID = 8844393428160958128L;
 	private static final Logger LOGGER = Logger.getLogger(AgentParameterDefinition.class.getName());
-	private static final String MASTER_DEFAULT = "master";
 	private static final String DESCRIPTION = "Agent Server Parameter.";
 
 	private final UUID uuid;
@@ -64,7 +64,11 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 	 * @return 构建参数默认值 （Build parameter default value）
 	 */
 	public String getDefaultValue() {
-		return this.defaultValue;
+		if (this.defaultValue != null) {
+			return this.defaultValue;
+		}
+		Jenkins jenkins = Jenkins.getInstanceOrNull();
+		return jenkins == null ? "" : jenkins.getSelfLabel().getName();
 	}
 
 	/**
@@ -73,13 +77,7 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 	 */
 	@DataBoundSetter
 	public void setDefaultValue(String defaultValue) {
-		if (defaultValue == null || defaultValue.isEmpty() || isBlank(defaultValue)) {
-			//默认是Master服务器（The default is the Master server）
-			this.defaultValue = MASTER_DEFAULT;
-		}
-		else {
-			this.defaultValue = defaultValue;
-		}
+		this.defaultValue = defaultValue == null || defaultValue.isBlank() ? null : defaultValue;
 	}
 
 	/**
@@ -98,7 +96,7 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 	 */
 	@CheckForNull
 	@Override
-	public ParameterValue createValue(StaplerRequest staplerRequest, JSONObject jsonObject) {
+	public ParameterValue createValue(StaplerRequest2 staplerRequest, JSONObject jsonObject) {
 		Object value = jsonObject.get("value");
 		StringBuilder strValue = new StringBuilder();
 		if (value instanceof String) {
@@ -128,9 +126,9 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 	 */
 	@CheckForNull
 	@Override
-	public ParameterValue createValue(StaplerRequest staplerRequest) {
+	public ParameterValue createValue(StaplerRequest2 staplerRequest) {
 		String[] value = staplerRequest.getParameterValues(this.getName());
-		if (value == null || value.length == 0 || isBlank(value[0])) {
+		if (value == null || value.length == 0 || value[0] == null || value[0].isBlank()) {
 			return this.getDefaultParameterValue();
 		}
 		else {
@@ -146,7 +144,7 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 	 */
 	@Override
 	public ParameterValue createValue(CLICommand command, String value) {
-		if (isNotEmpty(value)) {
+		if (value != null && !value.isEmpty()) {
 			return new AgentParameterValue(this.getName(), value);
 		}
 		return getDefaultParameterValue();
@@ -161,17 +159,6 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		return new AgentParameterValue(this.getName(), this.getDefaultValue());
 	}
 
-	@SuppressFBWarnings(value="EQ_COMPARETO_USE_OBJECT_EQUALS")
-	@Override
-	public int compareTo(AgentParameterDefinition o) {
-		if (o.uuid.equals(this.uuid)) {
-			return 0;
-		}
-		else {
-			return -1;
-		}
-	}
-
 	/**
 	 * 获取所有Agent Server的显示名称（Get the display names of all Agent Servers）
 	 * @return Agent Server的显示名称列表（List of display names of Agent Server）
@@ -180,12 +167,10 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		Computer[] computers = Jenkins.get().getComputers();
 		List<String> nameList = new ArrayList<>();
 		for (Computer computer : computers) {
-			nameList.add(computer.getDisplayName());
-		}
-
-		//确保列表中有Master节点（Make sure there is a Master node in the list）
-		if (!nameList.contains(MASTER_DEFAULT)) {
-			nameList.add(0, MASTER_DEFAULT);
+			Node node = computer.getNode();
+			if (node != null) {
+				nameList.add(node.getSelfLabel().getName());
+			}
 		}
 
 		String defaultName = this.getDefaultValue();
@@ -224,7 +209,7 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		 * @return 检查是否通过，如果没有通过返回错误信息。（Check if it passes, and return an error message if it fails.）
 		 */
 		public FormValidation doCheckName(@QueryParameter String name) {
-			if (name.length() == 0) {
+			if (name == null || name.isBlank()) {
 				return FormValidation.error(Messages.AgentParameterDefinition_DescriptorImpl_errors_missingName());
 			}
 
@@ -245,7 +230,7 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		/*
 		 * We need this for JENKINS-26143 -- reflective creation cannot handle setChoices(Object). See that method for context.
 		 */
-		public ParameterDefinition newInstance(@Nullable StaplerRequest req, @NonNull JSONObject formData) {
+		public ParameterDefinition newInstance(@Nullable StaplerRequest2 req, @NonNull JSONObject formData) {
 			String name = formData.getString("name");
 			String value = formData.getString("defaultValue");
 			return new AgentParameterDefinition(name, value);
@@ -258,13 +243,16 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		 * @param value 用户选择的Agent服务器的名称。（The name of the agent server selected by the user.）
 		 * @return 操作结果说明。（Explanation of operation result.）
 		 */
-		public String doSetDefaultValue(@AncestorInPath Job job, @QueryParameter String name, @QueryParameter String value) {
-			ParametersDefinitionProperty prop = (ParametersDefinitionProperty) job
-					.getProperty(ParametersDefinitionProperty.class);
+		@RequirePOST
+		public String doSetDefaultValue(@AncestorInPath Job<?, ?> job, @QueryParameter String name,
+				@QueryParameter String value) throws IOException {
+			job.checkPermission(Item.BUILD);
+			ParametersDefinitionProperty prop = job.getProperty(ParametersDefinitionProperty.class);
 			if (prop != null) {
 				ParameterDefinition pd = prop.getParameterDefinition(name);
 				if (pd instanceof AgentParameterDefinition) {
 					((AgentParameterDefinition) pd).setDefaultValue(value);
+					job.save();
 					return Messages.AgentParameterDefinition_DescriptorImpl_success_updateDefault();
 				}
 			}
@@ -282,9 +270,8 @@ public class AgentParameterDefinition extends ParameterDefinition implements  Co
 		 * @param name Agent Server Parameter的名称。（The name of the Agent Server Parameter.）
 		 * @return Agent名称列表是Select元素，返回此元素的内容。（The agent name list is the Select element, and returns the content of this element.）
 		 */
-		public ListBoxModel doFillValueItems(@AncestorInPath Job job, @QueryParameter String name) {
-			ParametersDefinitionProperty prop = (ParametersDefinitionProperty) job
-					.getProperty(ParametersDefinitionProperty.class);
+		public ListBoxModel doFillValueItems(@AncestorInPath Job<?, ?> job, @QueryParameter String name) {
+			ParametersDefinitionProperty prop = job.getProperty(ParametersDefinitionProperty.class);
 			if (prop != null) {
 				ParameterDefinition pd = prop.getParameterDefinition(name);
 				if (pd instanceof AgentParameterDefinition) {
