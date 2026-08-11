@@ -8,7 +8,18 @@
 			 data-update-url="${h.getCurrentDescriptorByNameUrl()}/${it.descriptor.descriptorUrl}/setDefaultValue"
 			 data-parameter-name="${it.name}">
 			<input type="hidden" name="name" value="${it.name}"/>
-			<f:select class="agent-server-parameter-select" field="value" default="${it.defaultValue}" style="width:auto;"/>
+			<select class="agent-server-parameter-select" name="value" style="width:auto;">
+				<j:forEach var="computerName" items="${it.computerNames}">
+					<j:choose>
+						<j:when test="${computerName == it.defaultValue}">
+							<option value="${computerName}" selected="selected">${computerName}</option>
+						</j:when>
+						<j:otherwise>
+							<option value="${computerName}">${computerName}</option>
+						</j:otherwise>
+					</j:choose>
+				</j:forEach>
+			</select>
 			<div class="agent-server-parameter-message"></div>
 		</div>
 	</f:entry>
