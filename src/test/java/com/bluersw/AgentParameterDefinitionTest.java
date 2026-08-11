@@ -12,6 +12,8 @@ import hudson.slaves.DumbSlave;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlSelect;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -87,6 +89,29 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
+	public void testBuildFormListsAllNodesAndSelectsDefault() throws Exception {
+		DumbSlave agent = jenkins.createOnlineSlave();
+		String agentName = agent.getSelfLabel().getName();
+		WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-build-form-options");
+		job.addProperty(new ParametersDefinitionProperty(
+				new AgentParameterDefinition(NAME, agentName)));
+
+		JenkinsRule.WebClient webClient = jenkins.createWebClient();
+		webClient.setThrowExceptionOnFailingStatusCode(false);
+		HtmlPage page = webClient.getPage(job, "build?delay=0sec");
+		HtmlSelect select = page.getFirstByXPath(
+				"//select[contains(concat(' ', normalize-space(@class), ' '), ' agent-server-parameter-select ')]");
+
+		assertNotNull(select);
+		assertEquals(agentName, select.getSelectedOptions().get(0).getValueAttribute());
+		assertTrue(select.getOptions().stream()
+				.anyMatch(option -> agentName.equals(option.getValueAttribute())));
+		assertTrue(select.getOptions().stream()
+				.anyMatch(option -> jenkins.jenkins.getSelfLabel().getName()
+						.equals(option.getValueAttribute())));
+	}
+
+	@Test
 	public void testIndexViewUsesExternalScriptInitialization() throws Exception {
 		try (InputStream view = AgentParameterDefinition.class
 				.getResourceAsStream("AgentParameterDefinition/index.jelly");
@@ -100,6 +125,8 @@ public class AgentParameterDefinitionTest {
 			assertFalse(javascript.contains("jQuery"));
 			assertTrue(jelly.contains("data-update-url"));
 			assertTrue(jelly.contains("data-parameter-name"));
+			assertTrue(jelly.contains("items=\"${it.computerNames}\""));
+			assertFalse(jelly.contains("<f:select"));
 			assertTrue(javascript.contains("Behaviour.specify"));
 		}
 	}
