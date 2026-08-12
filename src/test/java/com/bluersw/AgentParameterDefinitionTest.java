@@ -14,32 +14,40 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import static com.bluersw.Constants.DEFAULT_VALUE;
 import static com.bluersw.Constants.NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AgentParameterDefinitionTest {
-	@Rule
-	public JenkinsRule jenkins = new JenkinsRule();
+@WithJenkins
+class AgentParameterDefinitionTest {
+
+	private JenkinsRule jenkins;
+
+	@BeforeEach
+	void beforeEach(JenkinsRule rule) {
+		jenkins = rule;
+	}
 
 	@Test
-	public void testScriptedPipeline() throws Exception {
+	void testScriptedPipeline() throws Exception {
 		AgentParameterDefinition agentParam = new AgentParameterDefinition(NAME, DEFAULT_VALUE);
 
 		WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-scripted-pipeline");
 		job.addProperty(new ParametersDefinitionProperty(agentParam));
 		String pipelineScript
-				= "node {\n"
-				+ "  print params['agent'] \n"
-				+ "}";
+				= """
+                node {
+                  print params['agent']
+                }""";
 		job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
 		WorkflowRun completedBuild = jenkins.assertBuildStatusSuccess(job.scheduleBuild2(0));
 		String expectedString = DEFAULT_VALUE;
@@ -47,7 +55,7 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
-	public void testPipelineStartupIsNotAssignedToSelectedAgent() throws Exception {
+	void testPipelineStartupIsNotAssignedToSelectedAgent() throws Exception {
 		WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-pipeline-label");
 		AgentParameterValue value = new AgentParameterValue(NAME, "windows-agent");
 
@@ -55,7 +63,7 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
-	public void testFreestyleBuildIsAssignedToSelectedAgent() throws Exception {
+	void testFreestyleBuildIsAssignedToSelectedAgent() throws Exception {
 		FreeStyleProject job = jenkins.createFreeStyleProject("test-freestyle-label");
 		AgentParameterValue value = new AgentParameterValue(NAME, "linux-agent");
 
@@ -63,7 +71,7 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
-	public void testComputerNamesUseRunnableNodeLabels() throws Exception {
+	void testComputerNamesUseRunnableNodeLabels() throws Exception {
 		DumbSlave agent = jenkins.createOnlineSlave();
 		AgentParameterDefinition parameter = new AgentParameterDefinition(NAME, null);
 
@@ -75,7 +83,7 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
-	public void testSelectedAgentIsPersistedAsDefault() throws Exception {
+	void testSelectedAgentIsPersistedAsDefault() throws Exception {
 		FreeStyleProject job = jenkins.createFreeStyleProject("test-persisted-default");
 		AgentParameterDefinition parameter = new AgentParameterDefinition(NAME, DEFAULT_VALUE);
 		job.addProperty(new ParametersDefinitionProperty(parameter));
@@ -89,7 +97,7 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
-	public void testBuildFormListsAllNodesAndSelectsDefault() throws Exception {
+	void testBuildFormListsAllNodesAndSelectsDefault() throws Exception {
 		DumbSlave agent = jenkins.createOnlineSlave();
 		String agentName = agent.getSelfLabel().getName();
 		WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-build-form-options");
@@ -112,7 +120,7 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
-	public void testIndexViewUsesExternalScriptInitialization() throws Exception {
+	void testIndexViewUsesExternalScriptInitialization() throws Exception {
 		try (InputStream view = AgentParameterDefinition.class
 				.getResourceAsStream("AgentParameterDefinition/index.jelly");
 			 InputStream script = AgentParameterDefinition.class
