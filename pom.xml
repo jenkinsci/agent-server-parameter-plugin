@@ -20,6 +20,7 @@
         <jenkins.baseline>2.541</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <plugin-bom.version>6783.v88c6c30f4b_db_</plugin-bom.version>
+        <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     </properties>
     <licenses>
         <license>
