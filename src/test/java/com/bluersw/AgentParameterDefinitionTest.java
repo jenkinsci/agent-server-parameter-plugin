@@ -112,14 +112,35 @@ public class AgentParameterDefinitionTest {
 	}
 
 	@Test
+	public void testBuildFormEscapesParameterName() throws Exception {
+		String maliciousName = "\"><img id=\"xss-name\" src=\"x\" onerror=\"alert(1)\">";
+		WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-escaped-build-form");
+		job.addProperty(new ParametersDefinitionProperty(
+				new AgentParameterDefinition(maliciousName, null)));
+
+		JenkinsRule.WebClient webClient = jenkins.createWebClient();
+		webClient.setThrowExceptionOnFailingStatusCode(false);
+		HtmlPage page = webClient.getPage(job, "build?delay=0sec");
+		String response = page.getWebResponse().getContentAsString();
+
+		assertNull(page.getFirstByXPath("//*[@id='xss-name']"));
+		assertTrue(response.contains("&lt;img"));
+		assertFalse(response.contains("<img id=\"xss-name\""));
+	}
+
+	@Test
 	public void testIndexViewUsesExternalScriptInitialization() throws Exception {
 		try (InputStream view = AgentParameterDefinition.class
 				.getResourceAsStream("AgentParameterDefinition/index.jelly");
+			 InputStream rebuildView = AgentParameterRebuild.class
+				.getResourceAsStream("AgentParameterRebuild/value.jelly");
 			 InputStream script = AgentParameterDefinition.class
 				.getResourceAsStream("javascript/agent-parameter.js")) {
 			assertNotNull(view);
+			assertNotNull(rebuildView);
 			assertNotNull(script);
 			String jelly = new String(view.readAllBytes(), StandardCharsets.UTF_8);
+			String rebuildJelly = new String(rebuildView.readAllBytes(), StandardCharsets.UTF_8);
 			String javascript = new String(script.readAllBytes(), StandardCharsets.UTF_8);
 			assertFalse(jelly.contains("<script"));
 			assertFalse(javascript.contains("jQuery"));
@@ -127,6 +148,12 @@ public class AgentParameterDefinitionTest {
 			assertTrue(jelly.contains("data-parameter-name"));
 			assertTrue(jelly.contains("items=\"${it.computerNames}\""));
 			assertFalse(jelly.contains("<f:select"));
+			assertTrue(jelly.contains("escapeEntryTitleAndDescription\" value=\"false"));
+			assertTrue(jelly.contains("title=\"${h.escape(it.name)}\""));
+			assertTrue(jelly.contains("description=\"${it.formattedDescription}\""));
+			assertTrue(rebuildJelly.contains("escapeEntryTitleAndDescription\" value=\"false"));
+			assertTrue(rebuildJelly.contains("title=\"${h.escape(it.name)}\""));
+			assertTrue(rebuildJelly.contains("description=\"${it.formattedDescription}\""));
 			assertTrue(javascript.contains("Behaviour.specify"));
 		}
 	}

@@ -3,7 +3,8 @@
 		 xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 		 xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
 	<st:adjunct includes="com.bluersw.agentParameter"/>
-	<f:entry title="${it.name}" description="${it.description}">
+	<j:set var="escapeEntryTitleAndDescription" value="false"/>
+	<f:entry title="${h.escape(it.name)}" description="${it.formattedDescription}">
 		<div name="parameter" id="${it.divId}" class="agent-server-parameter" style="white-space:nowrap"
 			 data-update-url="${h.getCurrentDescriptorByNameUrl()}/${it.descriptor.descriptorUrl}/setDefaultValue"
 			 data-parameter-name="${it.name}">
